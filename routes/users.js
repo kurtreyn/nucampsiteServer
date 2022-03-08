@@ -7,7 +7,13 @@ const router = express.Router();
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
+  if (req.user.admin) {
+    return User.find();
+  } else {
+    const err = new Error('You are not an admin!');
+    err.status = 403;
+    return next(err);
+  }
 });
 
 router.post('/signup', (req, res) => {
@@ -36,7 +42,7 @@ router.post('/signup', (req, res) => {
           passport.authenticate('local')(req, res, () => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json({ success: true, status: 'Registration Successful' });
+            res.json({ success: true, status: 'Registration Successful!' });
           });
         });
       }
@@ -51,7 +57,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.json({
     success: true,
     token: token,
-    status: 'You are successfully logged in',
+    status: 'You are successfully logged in!',
   });
 });
 
@@ -62,7 +68,7 @@ router.get('/logout', (req, res, next) => {
     res.redirect('/');
   } else {
     const err = new Error('You are not logged in!');
-    err.status = 401;
+    err.status = 403;
     return next(err);
   }
 });
